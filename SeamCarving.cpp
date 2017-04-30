@@ -66,6 +66,7 @@ void SeamCarving()//НЋСаЫѕаЁ10%
 			for(int k=j+1;k<nCols;++k)
 				for(int l=0;l<3;++l)
 					mat[i][k-1][l]=mat[i][k][l];
+			j=from[i][j];
 		}
 		printf("%d\n",T);
 	}

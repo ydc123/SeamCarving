@@ -27,7 +27,7 @@ void CalcEnergyFunction(int M[maxn][maxn][3],int nRows,int nCols)
 			E[i][j]=val1+val2;
 		}
 }
-void SeamCarving()//将列缩小10%
+void SeamCarving()//将列缩小20%
 {
 	string name;
 	cin>>name;
@@ -37,7 +37,7 @@ void SeamCarving()//将列缩小10%
 		for(int j=0;j<M.cols;++j)
 			for(int k=0;k<3;++k)
 				mat[i][j][k]=M.at<Vec3b>(i,j)[k];
-	int goal=M.cols/10*9,nRows=M.rows,nCols=M.cols;
+	int goal=M.cols/10*8,nRows=M.rows,nCols=M.cols;
 	CalcEnergyFunction(mat,nRows,nCols);
 	for(int T=M.cols-goal;T>=1;--T)
 	{

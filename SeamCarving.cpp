@@ -5,16 +5,10 @@
 #include<cmath>
 #include<cstring>
 #include<opencv2/opencv.hpp>
-#define maxn 3000
-#define maxm 70
 using namespace std;
 using namespace cv;
 typedef long long LL;
-int E[maxn][maxn];
-int mat[maxn][maxn][3];
-int dp1[maxn][maxn],dp2[maxn][maxn];
-short from1[maxn][maxn],from2[maxn][maxn];
-void CalcEnergyFunction(int M[maxn][maxn][3],int nRows,int nCols)
+void CalcEnergyFunction(int ***mat,int nRows,int nCols,int **E)
 {
 	const int INF=1000000;
 	//for(int i=0;i<nRows;++i)
@@ -81,9 +75,28 @@ void CalcEnergyFunction(int M[maxn][maxn][3],int nRows,int nCols)
 }
 void SeamCarving()
 {
+	int **E;
+	int ***mat;
+	int **dp1,**dp2,**from1,**from2;
 	string name="test9.png";
 	//cin>>name;
 	Mat M=imread(name);
+	int maxn=M.rows+10,maxm=M.cols+10;
+	mat=new int** [maxn];
+	dp1=new int* [maxn],dp2=new int* [maxm],from1=new int* [maxn],from2=new int* [maxm];
+	for(int i=0;i<maxm;++i)
+		dp2[i]=new int [maxn],from2[i]=new int [maxn];
+	for(int i=0;i<maxn;++i)
+	{
+		dp1[i]=new int [maxm];
+		from1[i]=new int [maxm];
+		mat[i]=new int* [maxm];
+		for(int j=0;j<maxm;++j)
+			mat[i][j]=new int [3];
+	}
+	E=new int* [maxn];
+	for(int i=0;i<maxn;++i)
+		E[i]=new int [maxm];
 	int goalCol=M.cols/10*9,goalRow=M.rows/10*9,nRows=M.rows,nCols=M.cols,times=nRows-goalRow+nCols-goalCol;
 	for(int i=0;i<nRows;++i)
 		for(int j=0;j<nCols;++j)
@@ -91,7 +104,7 @@ void SeamCarving()
 				mat[i][j][k]=M.at<Vec3b>(i,j)[k];
 	while(nRows>goalRow||nCols>goalCol)
 	{
-		CalcEnergyFunction(mat,nRows,nCols);
+		CalcEnergyFunction(mat,nRows,nCols,E);
 		for(int i=0;i<nRows;++i)
 			for(int j=0;j<nCols;++j)
 			{
@@ -161,16 +174,50 @@ void SeamCarving()
 				pixel[k]=mat[i][j][k];
 			M.at<Vec3b>(i,j)=pixel;
 		}
-	imwrite("1.png",M);
+	imwrite("1.png",M);	
+	for(int i=0;i<maxm;++i)
+		delete[] dp2[i],delete[] from2[i];
+	for(int i=0;i<maxn;++i)
+	{
+		delete[] dp1[i];
+		delete[] from1[i];
+		for(int j=0;j<maxm;++j)
+			delete[] mat[i][j];
+		delete[] mat[i];
+	}
+	delete[] mat;
+	for(int i=0;i<maxn;++i)
+		delete[] E[i];
+	delete[] E;
 }
 void Enlarging()
 {
 	string name="test9.png";
-	//cin>>name;
-	static bool isDelete[maxn][maxn];
-	static pair<int,int> val[maxn];
-	static short seq[maxn*maxm][4];
 	Mat M=imread(name);
+	int **E,**dp,**from,***mat;
+	int maxn=M.rows+10,maxm=M.cols*2+10;
+	bool **isDelete;
+	mat=new int** [maxn],dp=new int* [maxn],from=new int*[maxn],isDelete=new bool* [maxn];
+	for(int i=0;i<maxn;++i)
+	{
+		mat[i]=new int* [maxm];
+		dp[i]=new int [maxm];
+		from[i]=new int[maxm];
+		isDelete[i]=new bool[maxm];
+		for(int j=0;j<maxm;++j)
+		{
+			mat[i][j]=new int [3];
+			isDelete[i][j]=false;
+		}
+	}
+	E=new int* [maxn];
+	for(int i=0;i<maxn;++i)
+		E[i]=new int [maxm];
+	pair<int,int> *val=new pair<int,int> [maxm];
+	int** seq;
+	seq=new int* [maxn*maxm];
+	for(int i=0;i<maxn*maxm;++i)
+		seq[i]=new int [4];
 	int goalCol=M.cols*2,nRows=M.rows,nCols=M.cols,times=abs(nCols-goalCol),k=nCols/2;
 	for(int i=0;i<nRows;++i)
 		for(int j=0;j<nCols;++j)
@@ -182,24 +229,24 @@ void Enlarging()
 		int nSeq=0;
 		for(int T=1;T<=delta;++T)
 		{
-			CalcEnergyFunction(mat,nRows,nCols);
+			CalcEnergyFunction(mat,nRows,nCols,E);
 			for(int i=0;i<nRows;++i)
 				for(int j=0;j<nCols;++j)
 				{
 					int e=E[i][j];
 					if(i==0)
-						dp1[i][j]=e;
+						dp[i][j]=e;
 					else
 					{
-						dp1[i][j]=dp1[i-1][j],from1[i][j]=j;
-						if(j>0&&dp1[i][j]>dp1[i-1][j-1])
-							dp1[i][j]=dp1[i-1][j-1],from1[i][j]=j-1;
-						if(j+1<nCols&&dp1[i][j]>dp1[i-1][j+1])
-							dp1[i][j]=dp1[i-1][j+1],from1[i][j]=j+1;
-						dp1[i][j]+=e;
+						dp[i][j]=dp[i-1][j],from[i][j]=j;
+						if(j>0&&dp[i][j]>dp[i-1][j-1])
+							dp[i][j]=dp[i-1][j-1],from[i][j]=j-1;
+						if(j+1<nCols&&dp[i][j]>dp[i-1][j+1])
+							dp[i][j]=dp[i-1][j+1],from[i][j]=j+1;
+						dp[i][j]+=e;
 					}
 				}
-			for(int i=nRows-1,j=min_element(dp1[nRows-1],dp1[nRows-1]+nCols)-dp1[nRows-1];i>=0;--i)
+			for(int i=nRows-1,j=min_element(dp[nRows-1],dp[nRows-1]+nCols)-dp[nRows-1];i>=0;--i)
 			{
 				++nSeq;
 				seq[nSeq][3]=j;
@@ -208,7 +255,7 @@ void Enlarging()
 				for(int k=j+1;k<nCols;++k)
 					for(int l=0;l<3;++l)
 						mat[i][k-1][l]=mat[i][k][l];
-				j=from1[i][j];
+				j=from[i][j];
 			}
 			--nCols;
 		}
@@ -255,10 +302,30 @@ void Enlarging()
 			M.at<Vec3b>(i,j)=pixel;
 		}
 	imwrite("2.png",M);
+	for(int i=0;i<maxn;++i)
+	{
+		for(int j=0;j<maxm;++j)
+			delete[] mat[i][j];
+		delete[] isDelete[i];
+		delete[] from[i];
+		delete[] dp[i];
+		delete[] mat[i];
+	}
+	delete[] mat;
+	delete[] dp;
+	delete[] from;
+	delete[] isDelete;
+	for(int i=0;i<maxn;++i)
+		delete[] E[i];
+	delete[] E;
+	delete[] val;
+	for(int i=0;i<maxn*maxm;++i)
+		delete[] seq[i];
+	delete[] seq;
 }
 int _tmain(int argc, _TCHAR* argv[])
 {
-	//SeamCarving();
+	SeamCarving();
 	Enlarging();
 	return 0;
 }

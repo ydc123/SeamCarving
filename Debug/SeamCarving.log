@@ -1,4 +1,4 @@
-﻿生成启动时间为 2017/5/1 15:00:43。
+﻿生成启动时间为 2017/5/2 17:21:11。
      1>项目“C:\Users\dell-pc\Documents\大学\大二下\计算机图形学\SeamCarving\SeamCarving.vcxproj”在节点 2 上(Build 个目标)。
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /IC:\opencv\build\include /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _CRT_SECURE_NO_WARNINGS /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"Debug\SeamCarving.pch" /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt SeamCarving.cpp
@@ -11,4 +11,4 @@
 
 生成成功。
 
-已用时间 00:00:02.75
+已用时间 00:00:05.51
